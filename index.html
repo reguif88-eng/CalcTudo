@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>CalcTudo</title>
+<meta name="description" content="CalcTudo: calculadora básica e científica, juros, investimentos, metas, financiamento imobiliário, porcentagem, unidades e datas.">
+<meta name="application-name" content="CalcTudo">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CalcTudo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#DCE0E5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12161B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#DCE0E5;--panel:#EBEEF1;--ink:#151A20;--ink-2:#4B5661;--ink-3:#77818C;--line:#BCC4CC;
+  --lcd:#C3CDA7;--lcd-ink:#1D2813;--lcd-dim:#546241;--rim:rgba(255,255,255,.55);
+  --key:#F8F9FA;--key-edge:#A5AEB8;--key-ink:#151A20;
+  --fn:#C6CDD5;--fn-edge:#95A0AB;--fn-ink:#151A20;
+  --op:#2E3A48;--op-edge:#141B24;--op-ink:#FFFFFF;
+  --clr:#C4402B;--clr-edge:#8A2717;--clr-ink:#FFFFFF;
+  --eq:#F0B429;--eq-edge:#B58306;--eq-ink:#1B1400;
+  --blue:#2350C8;--blue-ink:#FFFFFF;
+  --good:#1F7A4A;--bad:#B4321F;
+  --c1:#2350C8;--c2:#C98500;--c3:#1F7A4A;--c4:#9B3C7C;--c5:#77818C;
+  --ui:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --num:'Azeret Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12161B;--panel:#1B2129;--ink:#E9EDF1;--ink-2:#A3AEB9;--ink-3:#77838F;--line:#2C353F;--rim:rgba(255,255,255,.08);
+    --key:#2C353F;--key-edge:#0B0E11;--key-ink:#E9EDF1;
+    --fn:#3A4552;--fn-edge:#1A2027;--fn-ink:#E9EDF1;
+    --op:#3C5FA8;--op-edge:#1B2C50;--op-ink:#FFFFFF;
+    --clr:#D0503A;--clr-edge:#7E2113;
+    --blue:#7096FF;--blue-ink:#0A1230;
+    --good:#5FCB8E;--bad:#FF8F7C;
+    --c1:#7096FF;--c2:#F0B429;--c3:#5FCB8E;--c4:#E58BC4;--c5:#77838F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12161B;--panel:#1B2129;--ink:#E9EDF1;--ink-2:#A3AEB9;--ink-3:#77838F;--line:#2C353F;--rim:rgba(255,255,255,.08);
+  --key:#2C353F;--key-edge:#0B0E11;--key-ink:#E9EDF1;
+  --fn:#3A4552;--fn-edge:#1A2027;--fn-ink:#E9EDF1;
+  --op:#3C5FA8;--op-edge:#1B2C50;--op-ink:#FFFFFF;
+  --clr:#D0503A;--clr-edge:#7E2113;
+  --blue:#7096FF;--blue-ink:#0A1230;
+  --good:#5FCB8E;--bad:#FF8F7C;
+  --c1:#7096FF;--c2:#F0B429;--c3:#5FCB8E;--c4:#E58BC4;--c5:#77838F;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{background:var(--bg);scroll-padding-top:calc(env(safe-area-inset-top,0px) + 56px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--ui);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.app{max-width:560px;margin:0 auto;padding:6px 16px 48px}
+h1{font:700 21px/1 var(--ui);letter-spacing:-.02em;margin:14px 0 10px}
+
+/* abas: teclas de modo */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;gap:6px;overflow-x:auto;padding:8px 16px 10px;margin:0 -16px;background:var(--bg);border-bottom:1px solid var(--line);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;height:34px;padding:0 13px;border:0;border-radius:8px;background:var(--fn);box-shadow:0 2px 0 var(--fn-edge);color:var(--fn-ink);font:600 13px var(--ui)}
+.tab.on{background:var(--blue);color:var(--blue-ink);box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.panel{display:none;padding-top:16px}
+.panel.on{display:block}
+
+/* formulário */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px 10px}
+.fld{display:block;min-width:0}
+.fld.wide{grid-column:1/-1}
+.fl{display:block;font:500 12.5px var(--ui);color:var(--ink-2);margin:0 0 5px}
+.fb{display:flex;align-items:center;gap:6px;height:46px;padding:0 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.fb:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 22%,transparent)}
+.fb input,.fb select{flex:1;min-width:0;width:100%;background:transparent;border:0;outline:0;padding:0;font:500 16px var(--num);color:var(--ink)}
+.fb select{flex:0 0 auto;width:auto;max-width:52%;font:500 14px var(--ui);color:var(--ink-2);cursor:pointer}
+.fb select:only-child{flex:1;max-width:none;width:100%;font:500 15px var(--ui);color:var(--ink)}
+.fb .pre,.fb .suf{flex:0 0 auto;font:500 13px var(--num);color:var(--ink-3)}
+.fb input[type=date]{font-size:15px;min-height:24px}
+.hint{display:block;min-height:1em;font:400 12px var(--ui);color:var(--ink-3);margin-top:4px}
+.hint:empty{display:none}
+.swaprow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}
+.swaprow .swap{width:46px;height:46px;font-size:18px}
+
+/* display de cristal líquido */
+.lcd{position:relative;margin-top:18px;padding:34px 16px 14px;background:var(--lcd);color:var(--lcd-ink);border-radius:14px;overflow:hidden;
+  box-shadow:inset 0 3px 8px rgba(29,40,19,.38),inset 0 0 0 1px rgba(29,40,19,.28),0 1px 0 var(--rim)}
+.lcd .ann{position:absolute;top:11px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;font:600 12px/1 var(--ui);color:var(--lcd-dim)}
+.lcd .dig{text-align:right;font:500 34px/1.1 var(--num);letter-spacing:-.03em;white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+.lcd .dig::-webkit-scrollbar,.lcd .expr::-webkit-scrollbar{display:none}
+.lcd .sub{text-align:right;font:500 12.5px/1.35 var(--ui);color:var(--lcd-dim);margin-top:6px}
+.lcd .sub:empty{display:none}
+.lcd .expr{text-align:right;font:500 18px/1.3 var(--num);color:var(--lcd-dim);white-space:nowrap;overflow-x:auto;scrollbar-width:none;min-height:24px}
+.lcd.calc{min-height:172px;padding-top:40px;display:flex;flex-direction:column;justify-content:flex-end;margin-top:6px}
+.lcd.calc .dig{font-size:44px;cursor:copy}
+.chip{border:1px solid var(--lcd-dim);background:transparent;color:var(--lcd-ink);border-radius:5px;padding:3px 7px;font:600 11px/1 var(--ui);letter-spacing:.04em}
+#panel-calc:not(.sci) .chip,#panel-calc:not(.sci) #c-sci{display:none}
+
+/* teclas */
+.pad{display:grid;gap:8px;margin-top:14px}
+.pad.n4{grid-template-columns:repeat(4,1fr)}
+.pad.n5{grid-template-columns:repeat(5,1fr);gap:7px}
+.k{height:58px;padding:0;border:0;border-radius:9px;background:var(--key);color:var(--key-ink);box-shadow:0 3px 0 var(--key-edge);font:500 23px var(--num)}
+.k:active{transform:translateY(2px);box-shadow:0 1px 0 var(--key-edge)}
+.k.fn{background:var(--fn);color:var(--fn-ink);box-shadow:0 3px 0 var(--fn-edge);font-size:19px}
+.k.fn:active{box-shadow:0 1px 0 var(--fn-edge)}
+.k.op{background:var(--op);color:var(--op-ink);box-shadow:0 3px 0 var(--op-edge)}
+.k.op:active{box-shadow:0 1px 0 var(--op-edge)}
+.k.clr{background:var(--clr);color:var(--clr-ink);box-shadow:0 3px 0 var(--clr-edge)}
+.k.clr:active{box-shadow:0 1px 0 var(--clr-edge)}
+.k.eq{background:var(--eq);color:var(--eq-ink);box-shadow:0 3px 0 var(--eq-edge)}
+.k.eq:active{box-shadow:0 1px 0 var(--eq-edge)}
+.sci-pad .k{height:40px;border-radius:8px;font-size:14px}
+
+/* seções, fita e notas */
+.sec{margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.sec.first{margin-top:0;padding-top:0;border-top:0}
+.sec>h2,.more>summary{margin:0 0 12px;font:650 16px/1.2 var(--ui);letter-spacing:-.01em}
+.tape{margin-top:14px}
+.tape .row{display:flex;align-items:baseline;gap:8px;padding:7px 0;font:500 14px var(--ui);color:var(--ink-2)}
+.tape .dots{flex:1 1 12px;min-width:12px;border-bottom:2px dotted var(--ink-3);opacity:.55;transform:translateY(-3px)}
+.tape b{font:500 14px var(--num);color:var(--ink);text-align:right}
+.tape b.pos{color:var(--good)}
+.tape b.neg{color:var(--bad)}
+.tape.sm{margin-top:8px}
+.tape.sm .row{padding:4px 0;font-size:13px}
+.tape.sm b{font-size:13px}
+.note{margin:12px 0 0;font:400 13px/1.5 var(--ui);color:var(--ink-2)}
+.note.foot{margin-top:32px;color:var(--ink-3);font-size:12px}
+ul.notes{margin:0;padding-left:18px;font:400 13px/1.55 var(--ui);color:var(--ink-2)}
+ul.notes li{margin:0 0 6px}
+.muted{color:var(--ink-3);font-weight:400}
+.more{margin-top:24px;padding-top:16px;border-top:1px solid var(--line)}
+.more>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin:0}
+.more>summary::-webkit-details-marker{display:none}
+.more>summary::after{content:'+';font:500 20px var(--num);color:var(--ink-3)}
+.more[open]>summary::after{content:'−'}
+.more[open]>summary{margin-bottom:12px}
+
+.seg{display:flex;gap:4px;padding:4px;background:var(--fn);border-radius:10px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1 0 auto;border:0;background:transparent;color:var(--fn-ink);font:600 13px var(--ui);padding:9px 12px;border-radius:7px;white-space:nowrap}
+.seg button.on{background:var(--key);color:var(--key-ink);box-shadow:0 1px 0 var(--key-edge)}
+.btn{display:block;width:100%;height:46px;margin-top:14px;border:0;border-radius:9px;background:var(--op);color:var(--op-ink);box-shadow:0 2px 0 var(--op-edge);font:600 14px var(--ui)}
+
+/* histórico */
+.h-item{display:flex;justify-content:space-between;gap:12px;width:100%;padding:10px 0;background:none;border:0;border-top:1px solid var(--line);text-align:left;color:var(--ink-2);font:400 13px var(--num)}
+.h-item:first-child{border-top:0}
+.h-item b{color:var(--ink);font-weight:500;white-space:nowrap}
+.linkbtn{margin-top:8px;padding:6px 0;border:0;background:none;color:var(--blue);font:600 13px var(--ui)}
+
+/* gráficos */
+.chart{display:block;width:100%;height:auto;touch-action:pan-y}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .ax{fill:var(--ink-3);font:400 10px var(--num)}
+.chart .ln{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.chart .cur{stroke:var(--ink-3);stroke-width:1;display:none}
+.chart .pt{display:none;stroke:var(--bg);stroke-width:1.5}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font:500 12.5px var(--ui);color:var(--ink-2)}
+.legend span,.tip span{display:inline-flex;align-items:center;gap:6px}
+.legend i,.tip i{width:9px;height:9px;border-radius:2px;flex:none}
+.tip{display:flex;flex-wrap:wrap;gap:2px 14px;min-height:20px;margin-top:8px;font:400 12.5px var(--ui);color:var(--ink-2)}
+.tip b{font:500 12.5px var(--num);color:var(--ink)}
+
+/* tabelas */
+.tw{overflow:auto;max-height:380px;margin-top:12px;border:1px solid var(--line);border-radius:8px}
+.tw.all{max-height:none}
+table{border-collapse:collapse;width:100%;font:400 12.5px var(--num)}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{position:sticky;top:0;background:var(--fn);color:var(--fn-ink);font:600 12px var(--ui)}
+tr:last-child td{border-bottom:0}
+td:first-child,th:first-child{text-align:left}
+table.cmp td:first-child{font:500 13px var(--ui);color:var(--ink-2)}
+
+/* comparação de investimentos */
+.prod{padding:14px 0;border-top:1px solid var(--line)}
+.prod:first-of-type{border-top:0;padding-top:4px}
+.ph{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.pn{display:flex;align-items:center;gap:8px;font:650 16px var(--ui)}
+.pn i.sw{width:10px;height:10px;border-radius:3px;flex:none}
+.tag{font:600 11px var(--ui);font-style:normal;background:var(--eq);color:var(--eq-ink);padding:2px 7px;border-radius:5px}
+.pv{font:500 17px var(--num)}
+.bar{display:flex;height:8px;margin:10px 0 6px;background:var(--fn);border-radius:3px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--ink-3);opacity:.5}
+.bar span.g{opacity:1}
+.ps{font:400 12.5px var(--ui);color:var(--ink-2)}
+
+/* porcentagem e conversor */
+.sent{font:500 16px/2.7 var(--ui)}
+.inl{width:92px;height:38px;padding:0 10px;margin:0 4px;background:var(--panel);border:1px solid var(--line);border-radius:8px;font:500 16px var(--num);color:var(--ink);text-align:right}
+.inl:focus,.sent select:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 22%,transparent)}
+.sent select{height:38px;margin:0 4px;padding:0 8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;font:500 15px var(--ui)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font:600 13px var(--ui);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:50}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* instalação como app */
+.hd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 10px}
+.hd h1{margin:0}
+.instbtn{height:34px;padding:0 13px;border:0;border-radius:8px;background:var(--eq);color:var(--eq-ink);box-shadow:0 2px 0 var(--eq-edge);font:600 13px var(--ui)}
+.iostip{margin:0 0 10px}
+body{overscroll-behavior-y:contain}
+.k,.tab,.seg button,.instbtn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hd"><h1>CalcTudo</h1><button type="button" class="instbtn" id="install" hidden>Instalar app</button></header>
+  <p class="note iostip" id="ios-tip" hidden>Para instalar no iPhone ou iPad: toque em Compartilhar e depois em “Adicionar à Tela de Início”.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Módulos"></nav>
+  <main id="main"></main>
+  <p class="note foot">Simulações para fins educativos. Taxas, impostos e regras mudam com o tempo; confirme os valores com a instituição financeira antes de decidir.</p>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+(function(){
+'use strict';
+
+/* ================= utilitários ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={
+  get(k,d){try{const v=localStorage.getItem('calc.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem('calc.'+k,JSON.stringify(v));}catch(e){}}
+};
+const _nf={};
+const nf=(a,b)=>{const k=a+'_'+b;return _nf[k]||(_nf[k]=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:a,maximumFractionDigits:b}));};
+const fmt=(v,d=2)=>Number.isFinite(v)?nf(d,d).format(v):'—';
+const fa=(v,max=2)=>Number.isFinite(v)?nf(0,max).format(v):'—';
+const brl=v=>Number.isFinite(v)?(v<0?'−':'')+'R$ '+nf(2,2).format(Math.abs(v)):'—';
+const brl0=v=>Number.isFinite(v)?(v<0?'−':'')+'R$ '+nf(0,0).format(Math.abs(v)):'—';
+const pctf=(v,d=2)=>Number.isFinite(v)?nf(d,d).format(v)+'%':'—';
+const g=id=>parseNum($('#'+id).value);
+
+function parseNum(s){
+  if(s==null)return NaN;
+  s=String(s).trim().replace(/\s/g,'').replace(/^R\$/,'').replace('%','');
+  if(!s)return NaN;
+  if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+  else if(/^-?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+  const v=Number(s);
+  return Number.isFinite(v)?v:NaN;
+}
+function dur(m){
+  m=Math.round(m);
+  const y=Math.floor(m/12),mm=m%12,p=[];
+  if(y)p.push(y+(y===1?' ano':' anos'));
+  if(mm||!y)p.push(mm+(mm===1?' mês':' meses'));
+  return p.join(' e ');
+}
+function short(v){
+  const a=Math.abs(v),f=x=>nf(0,1).format(Math.round(x*10)/10);
+  if(a>=1e9)return f(v/1e9)+' bi';
+  if(a>=1e6)return f(v/1e6)+' mi';
+  if(a>=1e3)return f(v/1e3)+' mil';
+  return f(v);
+}
+let toastT;
+function toast(msg){
+  const t=$('#toast');t.textContent=msg;t.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1500);
+}
+
+/* ---------- blocos de HTML ---------- */
+function fld(id,label,value,o={}){
+  const inp=`<input id="${id}" type="${o.type||'text'}"${o.type==='date'?'':' inputmode="decimal"'} value="${esc(value)}" autocomplete="off" spellcheck="false"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`;
+  return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb">${o.pre?`<span class="pre">${o.pre}</span>`:''}${inp}${o.suf?`<span class="suf">${o.suf}</span>`:''}</span>${o.hint!==undefined?`<span class="hint" id="${id}-h">${o.hint}</span>`:''}</label>`;
+}
+function opts(list,sel){return list.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(sel)?' selected':''}>${l}</option>`).join('');}
+function fldSel(id,label,value,sid,list,sel,o={}){
+  return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb">${o.pre?`<span class="pre">${o.pre}</span>`:''}<input id="${id}" type="text" inputmode="decimal" value="${esc(value)}" autocomplete="off" spellcheck="false"><select id="${sid}">${opts(list,sel)}</select></span>${o.hint!==undefined?`<span class="hint" id="${id}-h">${o.hint}</span>`:''}</label>`;
+}
+function fldOnly(sid,label,list,sel,o={}){
+  return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb"><select id="${sid}">${opts(list,sel)}</select></span></label>`;
+}
+function seg(id,items,active){
+  return `<div class="seg" id="${id}">${items.map(([v,l])=>`<button type="button" data-v="${esc(v)}" class="${v===active?'on':''}">${l}</button>`).join('')}</div>`;
+}
+function bindSeg(el,cb){
+  el.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    $$('button',el).forEach(x=>x.classList.toggle('on',x===b));
+    cb(b.dataset.v);
+  });
+}
+function lcd(id,ann,big,sub){
+  return `<div class="lcd"><div class="ann"><span id="${id}-a">${ann||''}</span></div><div class="dig" id="${id}-v">${big||'—'}</div><div class="sub" id="${id}-s">${sub||''}</div></div>`;
+}
+function fit(el){const L=el.textContent.length;el.style.fontSize=(L>17?21:L>14?25:L>11?29:34)+'px';}
+function setLcd(id,ann,big,sub){
+  if(ann!=null)$('#'+id+'-a').textContent=ann;
+  const v=$('#'+id+'-v');v.textContent=big;fit(v);
+  $('#'+id+'-s').textContent=sub||'';
+}
+function tape(list,cls){
+  return `<div class="tape${cls?' '+cls:''}">${list.filter(Boolean).map(([l,v,c])=>`<div class="row"><span>${l}</span><i class="dots"></i><b${c?` class="${c}"`:''}>${v}</b></div>`).join('')}</div>`;
+}
+
+/* ---------- gráfico de linhas em SVG ---------- */
+const fmtM=i=>i===0?'Início':(i<12?i+(i===1?' mês':' meses'):dur(i));
+const axM=N=>i=>i===0?'0':(N<24?i+' m':fa(i/12,1)+' a');
+function drawChart(box,cfg){
+  const series=cfg.series,N=cfg.N,W=340,H=210,pl=48,pr=12,pt=12,pb=26;
+  let mx=0;
+  series.forEach(s=>{for(let i=0;i<s.values.length;i++){if(s.values[i]>mx)mx=s.values[i];}});
+  if(!(mx>0))mx=1;
+  const raw=mx/4,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;
+  const step=(f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p,top=step*4;
+  const X=i=>pl+(W-pl-pr)*(N>0?i/N:0);
+  const Y=v=>H-pb-(H-pb-pt)*((Number.isFinite(v)?v:0)/top);
+  const path=vals=>{
+    const st=Math.max(1,Math.floor(N/220));let d='';
+    for(let i=0;i<=N;i+=st)d+=(d?'L':'M')+X(i).toFixed(1)+' '+Y(vals[i]).toFixed(1);
+    if(N%st)d+='L'+X(N).toFixed(1)+' '+Y(vals[N]).toFixed(1);
+    return d;
+  };
+  let grid='';
+  for(let k=0;k<=4;k++){
+    const y=Y(step*k).toFixed(1);
+    grid+=`<line class="gl" x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}"/><text class="ax" x="${pl-6}" y="${(+y+3).toFixed(1)}" text-anchor="end">${short(step*k)}</text>`;
+  }
+  const xa=cfg.xAxis||cfg.xFmt;
+  [0,Math.round(N/2),N].forEach((i,k)=>{
+    grid+=`<text class="ax" x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="${k===0?'start':k===2?'end':'middle'}">${xa(i)}</text>`;
+  });
+  let lines='';
+  series.forEach(s=>{
+    const d=path(s.values);
+    if(s.area)lines+=`<path d="${d}L${X(N).toFixed(1)} ${Y(0).toFixed(1)}L${X(0).toFixed(1)} ${Y(0).toFixed(1)}Z" style="fill:var(--${s.c});opacity:.13"/>`;
+    lines+=`<path class="ln" d="${d}" style="stroke:var(--${s.c})${s.dash?';stroke-dasharray:5 4':''}"/>`;
+  });
+  const dots=series.map(s=>`<circle class="pt" r="3.8" style="fill:var(--${s.c})"/>`).join('');
+  box.innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de evolução">${grid}${lines}<line class="cur" y1="${pt}" y2="${H-pb}"/>${dots}</svg>`+
+    `<div class="legend">${series.map(s=>`<span><i style="background:var(--${s.c})"></i>${s.name}</span>`).join('')}</div>`+
+    `<div class="tip">Toque no gráfico para ver os valores.</div>`;
+  const svg=box.querySelector('svg'),tip=box.querySelector('.tip'),cur=svg.querySelector('.cur'),ds=svg.querySelectorAll('.pt');
+  const vf=cfg.vFmt||brl;
+  const upd=e=>{
+    const r=svg.getBoundingClientRect();if(!r.width)return;
+    const x=(e.clientX-r.left)/r.width*W;
+    let i=Math.round((x-pl)/(W-pl-pr)*N);i=Math.max(0,Math.min(N,i));
+    cur.setAttribute('x1',X(i));cur.setAttribute('x2',X(i));cur.style.display='inline';
+    ds.forEach((d,k)=>{d.setAttribute('cx',X(i));d.setAttribute('cy',Y(series[k].values[i]));d.style.display='inline';});
+    tip.innerHTML=`<b>${cfg.xFmt(i)}</b>`+series.map(s=>`<span><i style="background:var(--${s.c})"></i>${s.name}: <b>${vf(s.values[i])}</b></span>`).join('');
+  };
+  svg.addEventListener('pointermove',upd);
+  svg.addEventListener('pointerdown',upd);
+}
+
+/* ================= calculadora (básica + científica) ================= */
+const OPS='+−×÷^';
+const FN=['sin⁻¹','cos⁻¹','tan⁻¹','sin','cos','tan','ln','log','√','abs'];
+const FNRE='(sin⁻¹|cos⁻¹|tan⁻¹|sin|cos|tan|ln|log|√|abs)';
+const FNTAIL=new RegExp(FNRE+'\\($');
+const FNTAIL2=new RegExp(FNRE+'?\\($');
+
+function tokenize(s){
+  const out=[];let i=0;
+  while(i<s.length){
+    const ch=s[i];
+    if(/[0-9,]/.test(ch)){let j=i;while(j<s.length&&/[0-9,]/.test(s[j]))j++;out.push({t:'n',v:parseFloat(s.slice(i,j).replace(',','.'))});i=j;continue;}
+    if(ch==='π'){out.push({t:'n',v:Math.PI});i++;continue;}
+    if(ch==='e'){out.push({t:'n',v:Math.E});i++;continue;}
+    const f=FN.find(n=>s.startsWith(n,i));
+    if(f){out.push({t:'f',v:f});i+=f.length;continue;}
+    if('+−×÷^()%!'.includes(ch)){out.push({t:'o',v:ch});i++;continue;}
+    throw new Error('char');
+  }
+  return out;
+}
+function fact(x){if(x<0||!Number.isInteger(x)||x>170)return NaN;let r=1;for(let i=2;i<=x;i++)r*=i;return r;}
+function applyFn(name,x,deg){
+  const rad=v=>deg?v*Math.PI/180:v,dg=v=>deg?v*180/Math.PI:v,snap=v=>Math.abs(v)<1e-12?0:v;
+  switch(name){
+    case 'sin':return snap(Math.sin(rad(x)));
+    case 'cos':return snap(Math.cos(rad(x)));
+    case 'tan':if(deg&&Math.abs(x%180)===90)return NaN;return snap(Math.tan(rad(x)));
+    case 'sin⁻¹':return dg(Math.asin(x));
+    case 'cos⁻¹':return dg(Math.acos(x));
+    case 'tan⁻¹':return dg(Math.atan(x));
+    case 'ln':return x>0?Math.log(x):NaN;
+    case 'log':return x>0?Math.log10(x):NaN;
+    case '√':return x>=0?Math.sqrt(x):NaN;
+    case 'abs':return Math.abs(x);
+  }
+  return NaN;
+}
+function makeParser(tk,deg){
+  let p=0;
+  const peek=()=>tk[p],isOp=(t,v)=>t&&t.t==='o'&&t.v===v;
+  function expr(){
+    let left=term();
+    while(peek()&&peek().t==='o'&&(peek().v==='+'||peek().v==='−')){
+      const op=next().v,right=term();
+      const r=right.pct?left.v*right.v:right.v;
+      left={v:op==='+'?left.v+r:left.v-r};
+    }
+    return left;
+  }
+  function next(){return tk[p++];}
+  function term(){
+    let left=unary();
+    for(;;){
+      const t=peek();if(!t)break;
+      if(t.t==='o'&&(t.v==='×'||t.v==='÷')){next();const r=unary();left={v:t.v==='×'?left.v*r.v:left.v/r.v};}
+      else if(t.t==='n'||t.t==='f'||isOp(t,'(')){const r=unary();left={v:left.v*r.v};}
+      else break;
+    }
+    return left;
+  }
+  function unary(){
+    const t=peek();
+    if(isOp(t,'−')){next();return {v:-unary().v};}
+    if(isOp(t,'+')){next();return unary();}
+    return power();
+  }
+  function power(){
+    const base=postfix();
+    if(isOp(peek(),'^')){next();const ex=unary();return {v:Math.pow(base.v,ex.v)};}
+    return base;
+  }
+  function postfix(){
+    let x=primary(),pct=false;
+    while(peek()&&(isOp(peek(),'!')||isOp(peek(),'%'))){
+      const o=next().v;
+      if(o==='!')x={v:fact(x.v)};else{x={v:x.v/100};pct=true;}
+    }
+    return pct?{v:x.v,pct:true}:x;
+  }
+  function primary(){
+    const t=next();
+    if(!t)throw new Error('fim');
+    if(t.t==='n')return {v:t.v};
+    if(t.t==='f'){
+      let a;
+      if(isOp(peek(),'(')){next();a=expr();if(isOp(peek(),')'))next();}
+      else a=power();
+      return {v:applyFn(t.v,a.v,deg)};
+    }
+    if(isOp(t,'(')){const e=expr();if(isOp(peek(),')'))next();return {v:e.v};}
+    throw new Error('tok');
+  }
+  return {run(){const r=expr();if(p<tk.length)throw new Error('sobra');return r.v;}};
+}
+function trimTail(s){
+  let prev;
+  do{prev=s;s=s.replace(/[+−×÷^,]$/,'');s=s.replace(FNTAIL2,'');}while(s!==prev);
+  return s;
+}
+function autoClose(s){
+  const o=(s.match(/\(/g)||[]).length,c=(s.match(/\)/g)||[]).length;
+  return s+')'.repeat(Math.max(0,o-c));
+}
+function evalExpr(s,deg){
+  s=autoClose(trimTail(s));
+  if(!s)return {ok:false,empty:true};
+  try{
+    const r=makeParser(tokenize(s),deg).run();
+    if(!Number.isFinite(r))return {ok:false};
+    return {ok:true,v:r};
+  }catch(e){return {ok:false};}
+}
+function fmtNum(x){
+  if(!Number.isFinite(x))return 'Erro';
+  if(x===0)return '0';
+  const a=Math.abs(x);
+  if(a>=1e15||a<1e-9)return x.toExponential(6).replace(/\.?0+e/,'e').replace('.',',').replace('e+','e').replace(/-/g,'−');
+  return parseFloat(x.toPrecision(12)).toLocaleString('pt-BR',{maximumFractionDigits:10}).replace(/-/g,'−');
+}
+function numToExpr(x){
+  if(!Number.isFinite(x))return '';
+  const r=parseFloat(x.toPrecision(12));
+  let s=String(r);
+  if(/e/i.test(s)){
+    if(Math.abs(r)<1)s=r.toFixed(15).replace(/0+$/,'').replace(/\.$/,'');
+    else if(Math.abs(r)<1e21)s=r.toFixed(0);
+    else return '';
+  }
+  return s.replace('.',',').replace('-','−');
+}
+function fmtExpr(e){
+  return e.replace(/(\d+)(,\d*)?/g,(m,i,f)=>i.replace(/\B(?=(\d{3})+(?!\d))/g,'.')+(f||''));
+}
+
+function buildCalc(root){
+  const sciKeys=[
+    [['sin','sin('],['cos','cos('],['tan','tan('],['π','π'],['e','e']],
+    [['sin⁻¹','sin⁻¹('],['cos⁻¹','cos⁻¹('],['tan⁻¹','tan⁻¹('],['(','('],[')',')']],
+    [['ln','ln('],['log','log('],['√','√('],['x²','x²'],['xʸ','^']],
+    [['n!','n!'],['1/x','1/x'],['|x|','abs('],['10ˣ','10ˣ'],['eˣ','eˣ']]
+  ];
+  const mainKeys=[
+    [['C','C','clr'],['⌫','⌫','fn'],['%','%','fn'],['÷','÷','op']],
+    [['7'],['8'],['9'],['×','×','op']],
+    [['4'],['5'],['6'],['−','−','op']],
+    [['1'],['2'],['3'],['+','+','op']],
+    [['±','±','fn'],['0'],[','],['=','=','eq']]
+  ];
+  const keys=(rows,def)=>rows.flat().map(([l,k,c])=>`<button type="button" class="k${(c||def)?' '+(c||def):''}" data-k="${esc(k||l)}">${esc(l)}</button>`).join('');
+  root.innerHTML=`
+    <div class="lcd calc">
+      <div class="ann"><button type="button" class="chip" id="c-deg" aria-label="Alternar graus e radianos">DEG</button></div>
+      <div class="expr" id="c-expr"></div>
+      <div class="dig" id="c-res" title="Toque para copiar">0</div>
+    </div>
+    <div class="pad n5 sci-pad" id="c-sci">${keys(sciKeys,'fn')}</div>
+    <div class="pad n4" id="c-pad">${keys(mainKeys)}</div>
+    <details class="more"><summary><span>Histórico <span class="muted" id="c-hn"></span></span></summary><div id="c-hl"></div></details>`;
+
+  const S={expr:'',done:false,trail:'',err:false,deg:true,live:'0',result:'0',hist:store.get('hist',[])};
+
+  function refresh(){
+    let big,small='';
+    if(S.err){big='Erro';small=fmtExpr(S.expr);}
+    else if(!S.expr){big='0';}
+    else if(S.done){big=S.result;small=S.trail;}
+    else if(/^−?[\d,]*$/.test(S.expr)){big=fmtExpr(S.expr);}
+    else{
+      const r=evalExpr(S.expr,S.deg);
+      if(r.ok)S.live=fmtNum(r.v);else if(r.empty)S.live='0';
+      big=S.live;small=fmtExpr(S.expr);
+    }
+    const res=$('#c-res'),ex=$('#c-expr');
+    res.textContent=big;
+    const L=big.length;res.style.fontSize=(L>15?26:L>12?32:L>9?38:44)+'px';
+    ex.textContent=small;ex.scrollLeft=ex.scrollWidth;
+    $('#c-deg').textContent=S.deg?'DEG':'RAD';
+  }
+  function renderHist(){
+    $('#c-hn').textContent=S.hist.length?'('+S.hist.length+')':'';
+    $('#c-hl').innerHTML=S.hist.length
+      ?S.hist.map((h,i)=>`<button type="button" class="h-item" data-i="${i}"><span>${esc(h.e)}</span><b>= ${esc(h.r)}</b></button>`).join('')+'<button type="button" class="linkbtn" id="c-hclear">Limpar histórico</button>'
+      :'<p class="note" style="margin-top:0">As contas que você fechar com = aparecem aqui.</p>';
+  }
+  function addHist(e,v){
+    S.hist.unshift({e:e,r:fmtNum(v),x:numToExpr(v)});
+    S.hist=S.hist.slice(0,30);store.set('hist',S.hist);renderHist();
+  }
+
+  function press(k){
+    if(S.done&&k==='=')return;
+    S.err=false;
+    const startsNew=/^[0-9,]$/.test(k)||['π','e','(','10ˣ','eˣ'].includes(k)||FN.some(f=>k===f+'(');
+    if(S.done){if(startsNew)S.expr='';S.done=false;S.trail='';}
+    const e=S.expr,opnd=/[\d,πe)%!]$/.test(e);
+    if(/^[0-9]$/.test(k)){
+      if(opnd&&!/[\d,]$/.test(e))S.expr=e+'×'+k;
+      else if(/(^|[^\d,])0$/.test(e))S.expr=e.slice(0,-1)+k;
+      else S.expr=e+k;
+    }else if(k===','){
+      const run=(/[\d,]+$/.exec(e)||[''])[0];
+      if(run){if(!run.includes(','))S.expr=e+',';}
+      else S.expr=e+(opnd?'×0,':'0,');
+    }else if(OPS.includes(k)){
+      let b=e;if(b.endsWith(','))b=b.slice(0,-1);
+      if(!b){if(k==='−')S.expr='−';}
+      else if(/\($/.test(b)){if(k==='−')S.expr=b+'−';}
+      else if(OPS.includes(b.slice(-1))){
+        if(k==='−'&&'×÷^'.includes(b.slice(-1)))S.expr=b+'−';
+        else{let base=b;while(base&&OPS.includes(base.slice(-1)))base=base.slice(0,-1);S.expr=(base&&!/\($/.test(base))?base+k:base;}
+      }else S.expr=b+k;
+    }else if(k==='('){S.expr=e+(opnd?'×(':'(');}
+    else if(k===')'){const o=(e.match(/\(/g)||[]).length,c=(e.match(/\)/g)||[]).length;if(o>c&&opnd)S.expr=e+')';}
+    else if(k==='π'||k==='e'){S.expr=e+(opnd?'×':'')+k;}
+    else if(k==='10ˣ'){S.expr=e+(opnd?'×':'')+'10^(';}
+    else if(k==='eˣ'){S.expr=e+(opnd?'×':'')+'e^(';}
+    else if(k==='%'){if(/[\d)πe]$/.test(e))S.expr=e+'%';}
+    else if(k==='x²'){if(opnd)S.expr=e+'^2';}
+    else if(k==='n!'){if(/[\d)]$/.test(e))S.expr=e+'!';}
+    else if(k==='1/x'){
+      const m=/(\d+(?:,\d*)?)$/.exec(e);
+      if(m)S.expr=m.index===0?'1÷'+m[0]:e.slice(0,m.index)+'(1÷'+m[0]+')';
+      else if(opnd)S.expr='1÷('+e+')';
+    }else if(k==='±'){
+      const m=/(\d+(?:,\d*)?|,\d+)$/.exec(e);
+      if(m){
+        const before=e.slice(0,m.index);
+        if(before.endsWith('−')&&(before.length===1||/[+−×÷^(]$/.test(before.slice(0,-1))))S.expr=before.slice(0,-1)+m[0];
+        else S.expr=before+'−'+m[0];
+      }
+    }else if(k==='⌫'){
+      S.expr=FNTAIL.test(e)?e.replace(FNTAIL,''):e.slice(0,-1);
+    }else if(k==='C'){
+      S.expr='';S.trail='';S.live='0';
+    }else if(k==='='){
+      const r=evalExpr(e,S.deg);
+      if(r.ok){
+        const shown=fmtExpr(autoClose(trimTail(e)));
+        S.trail=shown+' =';addHist(shown,r.v);
+        S.expr=numToExpr(r.v);S.result=fmtNum(r.v);S.live=S.result;S.done=true;
+      }else if(!r.empty)S.err=true;
+    }else if(k.endsWith('(')){
+      S.expr=e+(opnd?'×':'')+k;
+    }
+    refresh();
+  }
+
+  root.addEventListener('click',e=>{const b=e.target.closest('.k');if(b){press(b.dataset.k);if(e.detail>0)b.blur();}});
+  $('#c-deg').addEventListener('click',()=>{S.deg=!S.deg;refresh();});
+  $('#c-res').addEventListener('click',()=>{
+    const t=$('#c-res').textContent;
+    if(t==='Erro'||!navigator.clipboard)return;
+    navigator.clipboard.writeText(t.replace(/\./g,'').replace(/−/g,'-')).then(()=>toast('Resultado copiado')).catch(()=>{});
+  });
+  $('#c-hl').addEventListener('click',e=>{
+    if(e.target.closest('#c-hclear')){S.hist=[];store.set('hist',[]);renderHist();return;}
+    const b=e.target.closest('.h-item');if(!b)return;
+    const h=S.hist[+b.dataset.i];
+    if(h&&h.x){S.expr=h.x;S.done=false;S.trail='';S.err=false;refresh();window.scrollTo({top:0,behavior:'smooth'});}
+  });
+  const keyMap={'*':'×','/':'÷','-':'−','.':',','Enter':'=','Backspace':'⌫','Escape':'C','Delete':'C'};
+  document.addEventListener('keydown',e=>{
+    if(!root.classList.contains('on'))return;
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const tg=e.target;if(tg&&/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(tg.tagName)&&tg.tagName!=='BUTTON')return;
+    let k=keyMap[e.key]||e.key;
+    if(e.key==='Enter'&&tg&&tg.tagName==='BUTTON')return;
+    if(/^[0-9]$/.test(k)||',+−×÷^()%!='.includes(k)&&k.length===1||k==='⌫'||k==='C'){e.preventDefault();press(k);}
+  });
+  renderHist();refresh();
+  return {setSci(on){root.classList.toggle('sci',on);}};
+}
+
+/* ================= juros simples e compostos ================= */
+function buildJuros(root){
+  root.innerHTML=`
+    ${seg('j-mode',[['comp','Juros compostos'],['simp','Juros simples']],'comp')}
+    <div class="form" style="margin-top:14px">
+      ${fld('j-cap','Capital inicial','10.000,00',{pre:'R$'})}
+      ${fld('j-apo','Aporte mensal','500,00',{pre:'R$'})}
+      ${fldSel('j-taxa','Taxa de juros','1,00','j-tu',[['am','% a.m.'],['aa','% a.a.']],'am')}
+      ${fldSel('j-prazo','Período','5','j-pu',[['anos','anos'],['meses','meses']],'anos',{hint:''})}
+    </div>
+    ${lcd('j','Montante final')}
+    <div id="j-tape"></div>
+    <section class="sec"><h2>Evolução do saldo</h2><div id="j-chart"></div></section>
+    <details class="more" id="j-det"><summary>Tabela mês a mês</summary><div class="tw" id="j-tbl"></div></details>`;
+  let mode='comp',rowsData=[];
+  function tbl(){
+    if(!$('#j-det').open)return;
+    $('#j-tbl').innerHTML='<table><thead><tr><th>Mês</th><th>Juros</th><th>Investido</th><th>Saldo</th></tr></thead><tbody>'+
+      rowsData.map(r=>`<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td><td>${fmt(r[3])}</td></tr>`).join('')+'</tbody></table>';
+  }
+  function calc(){
+    $('#j-apo').closest('.fld').hidden=mode!=='comp';
+    const C=g('j-cap')||0,Ap=mode==='comp'?(g('j-apo')||0):0,r=g('j-taxa')/100,t=g('j-prazo');
+    const tu=$('#j-tu').value,pu=$('#j-pu').value;
+    let months=Math.round(pu==='anos'?t*12:t);
+    const label=mode==='comp'?'Montante final (compostos)':'Montante final (simples)';
+    if(!((C>0||Ap>0)&&Number.isFinite(r)&&r>=0&&months>=1)){
+      setLcd('j',label,'—','Informe capital, taxa e período.');
+      $('#j-tape').innerHTML='';$('#j-chart').innerHTML='';rowsData=[];tbl();return;
+    }
+    let capped=false;if(months>1200){months=1200;capped=true;}
+    $('#j-prazo-h').textContent=capped?'Limitado a 100 anos.':'';
+    const inv=[C],tot=[C];rowsData=[];
+    let im;
+    if(mode==='comp'){
+      im=tu==='am'?r:Math.pow(1+r,1/12)-1;
+      let bal=C;
+      for(let k=1;k<=months;k++){const j=bal*im;bal+=j+Ap;inv.push(C+Ap*k);tot.push(bal);rowsData.push([k,j,C+Ap*k,bal]);}
+    }else{
+      im=tu==='am'?r:r/12;
+      for(let k=1;k<=months;k++){const b=C*(1+im*k);inv.push(C);tot.push(b);rowsData.push([k,C*im,C,b]);}
+    }
+    if(!Number.isFinite(tot[months])||tot[months]>1e18){
+      setLcd('j',label,'—','Os valores geram um resultado grande demais.');
+      $('#j-tape').innerHTML='';$('#j-chart').innerHTML='';rowsData=[];tbl();return;
+    }
+    const M=tot[months],I=inv[months],J=M-I;
+    const annual=mode==='comp'?(Math.pow(1+im,12)-1)*100:im*1200;
+    const list=[
+      ['Total investido',brl(I)],
+      ['Total em juros',brl(J),'pos'],
+      ['Rentabilidade no período',pctf(I>0?J/I*100:0)],
+      ['Taxa mensal',pctf(im*100,4)],
+      [mode==='comp'?'Taxa anual equivalente':'Taxa anual (simples)',pctf(annual)]
+    ];
+    if(Ap===0&&C>0&&im>0)list.push(['Tempo para dobrar o capital',dur(mode==='comp'?Math.log(2)/Math.log(1+im):1/im)]);
+    setLcd('j',label,brl(M),`${pctf(I>0?J/I*100:0)} de rendimento em ${dur(months)}.`);
+    $('#j-tape').innerHTML=tape(list);
+    drawChart($('#j-chart'),{N:months,xFmt:fmtM,xAxis:axM(months),series:[
+      {name:'Investido',c:'c5',values:inv,dash:true},{name:'Montante',c:'c1',values:tot,area:true}]});
+    tbl();
+  }
+  bindSeg($('#j-mode'),v=>{mode=v;calc();});
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  $('#j-det').addEventListener('toggle',tbl);
+  calc();
+}
+
+/* ================= comparador de renda fixa ================= */
+function project(P,A,n,im,taxed){
+  const pw=new Float64Array(n+1);pw[0]=1;
+  for(let i=1;i<=n;i++)pw[i]=pw[i-1]*(1+im);
+  const irr=m=>{if(!taxed)return 0;const d=m*30;return d<=180?.225:d<=360?.2:d<=720?.175:.15;};
+  const net=new Array(n+1),gross=new Array(n+1);
+  for(let m=0;m<=n;m++){
+    let gr=P*pw[m],nt=gr-P*(pw[m]-1)*irr(m);
+    for(let k=1;k<=m;k++){const h=m-k,gk=A*pw[h];gr+=gk;nt+=gk-A*(pw[h]-1)*irr(h);}
+    gross[m]=gr;net[m]=nt;
+  }
+  return {net,gross};
+}
+function buildInvest(root){
+  root.innerHTML=`
+    <div class="form">
+      ${fld('i-ini','Valor inicial','10.000,00',{pre:'R$'})}
+      ${fld('i-apo','Aporte mensal','500,00',{pre:'R$'})}
+      ${fldSel('i-prazo','Prazo','5','i-pu',[['anos','anos'],['meses','meses']],'anos')}
+      ${fld('i-selic','Selic','13,75',{suf:'% a.a.'})}
+      ${fld('i-ipca','Inflação esperada','4,9',{suf:'% a.a.'})}
+      ${fld('i-cdb','CDB rende','100',{suf:'% do CDI'})}
+      ${fld('i-lci','LCI/LCA rende','90',{suf:'% do CDI'})}
+    </div>
+    <p class="note" id="i-cdi"></p>
+    <section class="sec"><h2>Quanto cada opção rende</h2><div id="i-list"></div></section>
+    <section class="sec" id="i-cs"><h2>Evolução líquida de IR</h2><div id="i-chart"></div></section>
+    <details class="more"><summary>Como calculamos</summary>
+      <ul class="notes">
+        <li>Os aportes entram no fim de cada mês.</li>
+        <li>O IR usa a tabela regressiva sobre cada aporte, pelo tempo que ele ficou investido: 22,5% até 180 dias, 20% até 360, 17,5% até 720 e 15% depois disso.</li>
+        <li>O CDI é estimado como a Selic menos 0,10 ponto percentual.</li>
+        <li>O Tesouro Selic usa a Selic menos 0,20% ao ano de taxa de custódia da B3.</li>
+        <li>A poupança rende 0,5% ao mês (mais TR, que aqui é zero) enquanto a Selic estiver acima de 8,5% ao ano. Abaixo disso, rende 70% da Selic.</li>
+        <li>LCI e LCA são isentas de IR para pessoa física, mas costumam ter carência para resgate.</li>
+        <li>Não entram IOF de resgates em menos de 30 dias, taxas de corretora nem oscilação de preço dos títulos.</li>
+      </ul>
+    </details>`;
+  function calc(){
+    const P=g('i-ini')||0,A=g('i-apo')||0,t=g('i-prazo'),selic=g('i-selic'),ipca=g('i-ipca')||0,pc=g('i-cdb'),pl=g('i-lci');
+    let n=Math.round($('#i-pu').value==='anos'?t*12:t);
+    if(!((P>0||A>0)&&n>=1&&Number.isFinite(selic)&&Number.isFinite(pc)&&Number.isFinite(pl))){
+      $('#i-list').innerHTML='<p class="note" style="margin-top:0">Informe valor, prazo, Selic e os percentuais do CDI.</p>';
+      $('#i-cs').hidden=true;return;
+    }
+    $('#i-cs').hidden=false;
+    n=Math.min(n,600);
+    const cdi=Math.max(0,selic-0.10);
+    $('#i-cdi').textContent=`CDI estimado em ${fmt(cdi)}% ao ano.`;
+    const mo=a=>Math.pow(1+a/100,1/12)-1;
+    const poup=selic>8.5?0.005:0.7*mo(selic);
+    const prods=[
+      {name:'CDB / RDB',sub:`Rende ${fa(pc)}% do CDI, com IR regressivo.`,im:mo(cdi*pc/100),tax:true,c:'c1'},
+      {name:'LCI / LCA',sub:`Rende ${fa(pl)}% do CDI, isenta de IR.`,im:mo(cdi*pl/100),tax:false,c:'c2'},
+      {name:'Tesouro Selic',sub:'Acompanha a Selic, com IR regressivo.',im:mo(Math.max(0,selic-0.20)),tax:true,c:'c3'},
+      {name:'Poupança',sub:selic>8.5?'Rende 0,5% ao mês, isenta de IR.':'Rende 70% da Selic, isenta de IR.',im:poup,tax:false,c:'c4'}
+    ];
+    const invested=P+A*n,infl=Math.pow(1+ipca/100,n/12);
+    prods.forEach(p=>{
+      p.b=project(P,A,n,p.im,p.tax);
+      p.net=p.b.net[n];p.taxPaid=p.b.gross[n]-p.net;p.gain=p.net-invested;p.real=p.net/infl;
+    });
+    const order=prods.slice().sort((a,b)=>b.net-a.net),max=order[0].net;
+    $('#i-list').innerHTML=`<p class="note" style="margin:0 0 6px">Você investe ${brl0(invested)} em ${dur(n)}.</p>`+order.map((p,idx)=>{
+      const wi=Math.min(100,invested/max*100),wg=Math.max(0,p.net-invested)/max*100;
+      const rows=[['Rendimento líquido',brl(p.gain),'pos'],[p.taxPaid>0.005?'IR pago':'Imposto',p.taxPaid>0.005?brl(p.taxPaid):'Isento']];
+      if(ipca>0)rows.push(['Em valores de hoje',brl(p.real)]);
+      return `<div class="prod">
+        <div class="ph"><span class="pn"><i class="sw" style="background:var(--${p.c})"></i>${p.name}${idx===0?'<em class="tag">melhor</em>':''}</span><b class="pv">${brl(p.net)}</b></div>
+        <div class="bar"><span style="width:${wi.toFixed(1)}%"></span><span class="g" style="width:${wg.toFixed(1)}%;background:var(--${p.c})"></span></div>
+        <div class="ps">${p.sub}</div>${tape(rows,'sm')}</div>`;
+    }).join('');
+    const inv=[];for(let m=0;m<=n;m++)inv.push(P+A*m);
+    drawChart($('#i-chart'),{N:n,xFmt:fmtM,xAxis:axM(n),series:[{name:'Investido',c:'c5',values:inv,dash:true}].concat(prods.map(p=>({name:p.name,c:p.c,values:p.b.net})))});
+  }
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  calc();
+}
+
+/* ================= metas ================= */
+function sim(P,A,i,n){
+  const inv=[P],tot=[P];let b=P;
+  for(let k=1;k<=n;k++){b=b*(1+i)+A;inv.push(P+A*k);tot.push(b);}
+  return {inv,tot};
+}
+function buildMetas(root){
+  root.innerHTML=`
+    ${seg('m-mode',[['aporte','Aporte mensal'],['prazo','Prazo'],['renda','Renda passiva']],'aporte')}
+    <div class="form" data-sec="aporte" style="margin-top:14px">
+      ${fld('ma-meta','Meta','500.000,00',{pre:'R$'})}
+      ${fld('ma-ini','Valor inicial','10.000,00',{pre:'R$'})}
+      ${fldSel('ma-prazo','Prazo','15','ma-pu',[['anos','anos'],['meses','meses']],'anos')}
+      ${fld('ma-rent','Rendimento líquido','9',{suf:'% a.a.'})}
+    </div>
+    <div class="form" data-sec="prazo" style="margin-top:14px" hidden>
+      ${fld('mp-meta','Meta','500.000,00',{pre:'R$'})}
+      ${fld('mp-ini','Valor inicial','10.000,00',{pre:'R$'})}
+      ${fld('mp-apo','Aporte mensal','1.500,00',{pre:'R$'})}
+      ${fld('mp-rent','Rendimento líquido','9',{suf:'% a.a.'})}
+    </div>
+    <div class="form" data-sec="renda" style="margin-top:14px" hidden>
+      ${fld('mr-renda','Renda mensal desejada','8.000,00',{pre:'R$'})}
+      ${fld('mr-rent','Rendimento real','6',{suf:'% a.a.',hint:'Acima da inflação.'})}
+    </div>
+    ${lcd('m','Aporte mensal necessário')}
+    <div id="m-tape"></div>
+    <div id="m-extra"></div>
+    <section class="sec" id="m-cs"><h2>Evolução do patrimônio</h2><div id="m-chart"></div></section>`;
+  let mode='aporte';
+  function render(o){
+    setLcd('m',o.label,o.big,o.sub||'');
+    $('#m-tape').innerHTML=o.rows?tape(o.rows):'';
+    $('#m-cs').hidden=!o.chart;
+    if(o.chart)drawChart($('#m-chart'),o.chart);else $('#m-chart').innerHTML='';
+    $('#m-extra').innerHTML=o.extra||'';
+  }
+  const chartOf=(s,n)=>({N:n,xFmt:fmtM,xAxis:axM(n),series:[{name:'Investido',c:'c5',values:s.inv,dash:true},{name:'Patrimônio',c:'c1',values:s.tot,area:true}]});
+  function calc(){
+    $$('[data-sec]',root).forEach(el=>{el.hidden=el.dataset.sec!==mode;});
+    if(mode==='aporte'){
+      const FV=g('ma-meta'),P=g('ma-ini')||0,t=g('ma-prazo'),r=g('ma-rent');
+      let n=Math.round($('#ma-pu').value==='anos'?t*12:t);
+      const label='Aporte mensal necessário';
+      if(!(FV>0&&n>=1&&Number.isFinite(r)&&r>=0))return render({label,big:'—',sub:'Informe meta, prazo e rendimento.'});
+      n=Math.min(n,1200);
+      const i=Math.pow(1+r/100,1/12)-1,gf=Math.pow(1+i,n);
+      let A=i===0?(FV-P)/n:(FV-P*gf)*i/(gf-1);
+      if(!(A>0))A=0;
+      const s=sim(P,A,i,n);
+      return render({label,big:brl(A),
+        sub:A===0?'Seu valor inicial já chega à meta no prazo.':`Para juntar ${brl0(FV)} em ${dur(n)}.`,
+        rows:[['Total investido',brl(s.inv[n])],['Juros acumulados',brl(s.tot[n]-s.inv[n]),'pos'],['Valor inicial após o prazo',brl(P*gf)],['Patrimônio final',brl(s.tot[n])]],
+        chart:chartOf(s,n)});
+    }
+    if(mode==='prazo'){
+      const FV=g('mp-meta'),P=g('mp-ini')||0,A=g('mp-apo')||0,r=g('mp-rent');
+      const label='Tempo até a meta';
+      if(!(FV>0&&Number.isFinite(r)&&r>=0&&(P>0||A>0)))return render({label,big:'—',sub:'Informe meta, aporte e rendimento.'});
+      if(P>=FV)return render({label,big:'Já atingida',sub:'O valor inicial já é igual ou maior que a meta.'});
+      const i=Math.pow(1+r/100,1/12)-1;
+      let n;
+      if(i===0){if(A<=0)return render({label,big:'—',sub:'Sem aporte e sem rendimento, a meta não é alcançada.'});n=(FV-P)/A;}
+      else{
+        const num=FV*i+A,den=P*i+A;
+        if(!(den>0&&num>0))return render({label,big:'—',sub:'Confira os valores informados.'});
+        n=Math.log(num/den)/Math.log(1+i);
+      }
+      n=Math.ceil(n-1e-9);
+      if(!Number.isFinite(n)||n<0)return render({label,big:'—',sub:'Confira os valores informados.'});
+      if(n>1200)return render({label,big:'Mais de 100 anos',sub:'Aumente o aporte ou o rendimento para encurtar o prazo.'});
+      const s=sim(P,A,i,n);
+      return render({label,big:dur(n),sub:`Você terá ${brl0(s.tot[n])} com aportes de ${brl0(A)} por mês.`,
+        rows:[['Total investido',brl(s.inv[n])],['Juros acumulados',brl(s.tot[n]-s.inv[n]),'pos'],['Patrimônio final',brl(s.tot[n])]],
+        chart:chartOf(s,n)});
+    }
+    const R=g('mr-renda'),r=g('mr-rent'),label='Patrimônio necessário';
+    if(!(R>0&&r>0))return render({label,big:'—',sub:'Informe a renda desejada e um rendimento maior que zero.'});
+    const i=Math.pow(1+r/100,1/12)-1,W=R/i;
+    render({label,big:brl0(W),sub:`Para viver de ${brl0(R)} por mês sem gastar o principal.`,
+      rows:[['Renda mensal',brl(R)],['Rendimento mensal',pctf(i*100,3)],['Pela regra dos 4% ao ano',brl0(R*300)]],
+      extra:'<button type="button" class="btn" id="m-go">Ver em quanto tempo chego lá</button>'});
+  }
+  function setMode(v){mode=v;$$('button',$('#m-mode')).forEach(b=>b.classList.toggle('on',b.dataset.v===v));calc();}
+  bindSeg($('#m-mode'),v=>{mode=v;calc();});
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  root.addEventListener('click',e=>{
+    if(!e.target.closest('#m-go'))return;
+    const R=g('mr-renda'),r=g('mr-rent');
+    if(R>0&&r>0){$('#mp-meta').value=nf(2,2).format(R/(Math.pow(1+r/100,1/12)-1));}
+    setMode('prazo');
+  });
+  calc();
+}
+
+/* ================= financiamento imobiliário ================= */
+function buildImovel(root){
+  root.innerHTML=`
+    <div class="form">
+      ${fld('im-val','Valor do imóvel','500.000,00',{pre:'R$'})}
+      ${fld('im-ent','Entrada','100.000,00',{pre:'R$',hint:''})}
+      ${fldSel('im-prazo','Prazo','30','im-pu',[['anos','anos'],['meses','meses']],'anos')}
+      ${fld('im-taxa','Juros','11,49',{suf:'% a.a.'})}
+      ${fldOnly('im-tipo','Tipo da taxa',[['nom','Nominal (÷ 12)'],['efe','Efetiva anual']],'nom')}
+      ${fld('im-seg','Seguros e taxas','60,00',{pre:'R$',hint:'Por mês.'})}
+      ${fld('im-renda','Sua renda mensal (opcional)','',{pre:'R$',wide:true,ph:'ex.: 15.000,00'})}
+    </div>
+    ${lcd('im','Valor financiado')}
+    <div id="im-out">
+      <section class="sec"><h2>SAC ou Price</h2>
+        <div class="tw all"><table class="cmp" id="im-cmp"></table></div>
+        <p class="note" id="im-ins"></p>
+        <p class="note" style="margin-top:6px">Renda mínima: a necessária para a 1ª parcela ficar em até 30% dela.</p>
+        <div id="im-fit"></div>
+      </section>
+      <section class="sec"><h2>Parcela ao longo do tempo</h2><div id="im-chart"></div></section>
+      <details class="more" id="im-det"><summary>Tabela de amortização</summary>
+        ${seg('im-tsys',[['sac','SAC'],['price','Price']],'sac')}
+        <div class="tw" id="im-tbl"></div>
+      </details>
+      <details class="more"><summary>Entenda o SAC e a Price</summary>
+        <ul class="notes">
+          <li>No SAC a amortização é sempre a mesma. A parcela começa mais alta e diminui com o tempo, e você paga menos juros no total.</li>
+          <li>Na Price a parcela é fixa. Ela começa menor, mas o saldo devedor cai devagar e o total de juros é maior.</li>
+          <li>Os valores não incluem TR, ITBI, escritura, avaliação do imóvel nem reajustes. Seguros e taxas entram como um valor fixo por mês.</li>
+        </ul>
+      </details>
+    </div>`;
+  let sacRows=[],prRows=[],sys='sac';
+  function tbl(){
+    if(!$('#im-det').open)return;
+    const rows=sys==='sac'?sacRows:prRows;
+    $('#im-tbl').innerHTML='<table><thead><tr><th>Mês</th><th>Parcela</th><th>Juros</th><th>Amortização</th><th>Saldo</th></tr></thead><tbody>'+
+      rows.map(r=>`<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td><td>${fmt(r[3])}</td><td>${fmt(r[4])}</td></tr>`).join('')+'</tbody></table>';
+  }
+  function calc(){
+    const V=g('im-val'),E=g('im-ent')||0,t=g('im-prazo'),r=g('im-taxa'),fee=g('im-seg')||0,renda=g('im-renda');
+    let n=Math.round($('#im-pu').value==='anos'?t*12:t);
+    $('#im-ent-h').textContent=V>0?`${fa(E/V*100,1)}% do valor do imóvel.`:'';
+    const bad=!(V>0&&E>=0&&E<V&&n>=2&&Number.isFinite(r)&&r>=0);
+    $('#im-out').hidden=bad;
+    if(bad){
+      setLcd('im','Valor financiado','—',V>0&&E>=V?'A entrada precisa ser menor que o valor do imóvel.':'Informe valor, entrada, prazo e juros.');
+      return;
+    }
+    n=Math.min(n,480);
+    const PV=V-E,i=$('#im-tipo').value==='nom'?r/1200:Math.pow(1+r/100,1/12)-1;
+    sacRows=[];prRows=[];
+    let sd=PV,sJur=0,sTot=0;const am=PV/n;
+    for(let k=1;k<=n;k++){const j=sd*i;sd-=am;sacRows.push([k,am+j+fee,j,am,Math.max(sd,0)]);sJur+=j;sTot+=am+j+fee;}
+    const pmt=i===0?PV/n:PV*i/(1-Math.pow(1+i,-n));
+    let pd=PV,pJur=0;
+    for(let k=1;k<=n;k++){const j=pd*i,a=pmt-j;pd-=a;prRows.push([k,pmt+fee,j,a,Math.max(pd,0)]);pJur+=j;}
+    const pTot=(pmt+fee)*n,sF=sacRows[0][1],pF=prRows[0][1];
+    setLcd('im','Valor financiado',brl0(PV),`Entrada de ${brl0(E)} (${fa(E/V*100,1)}%), prazo de ${dur(n)}.`);
+    $('#im-cmp').innerHTML=`<thead><tr><th></th><th>SAC</th><th>Price</th></tr></thead><tbody>
+      <tr><td>1ª parcela</td><td>${brl(sF)}</td><td>${brl(pF)}</td></tr>
+      <tr><td>Última parcela</td><td>${brl(sacRows[n-1][1])}</td><td>${brl(prRows[n-1][1])}</td></tr>
+      <tr><td>Total de juros</td><td>${brl0(sJur)}</td><td>${brl0(pJur)}</td></tr>
+      <tr><td>Total pago</td><td>${brl0(sTot)}</td><td>${brl0(pTot)}</td></tr>
+      <tr><td>Renda mínima</td><td>${brl0(sF/0.3)}</td><td>${brl0(pF/0.3)}</td></tr></tbody>`;
+    const dj=pJur-sJur;
+    $('#im-ins').textContent=dj>1?`O SAC gasta ${brl0(dj)} a menos em juros. Em troca, a 1ª parcela é ${brl0(sF-pF)} maior que a da Price.`:'';
+    $('#im-fit').innerHTML=renda>0?tape([
+      ['Renda comprometida no SAC',pctf(sF/renda*100,1),sF/renda>0.3?'neg':'pos'],
+      ['Renda comprometida na Price',pctf(pF/renda*100,1),pF/renda>0.3?'neg':'pos']
+    ]):'';
+    drawChart($('#im-chart'),{N:n-1,xFmt:i=>'Mês '+(i+1),xAxis:i=>'mês '+(i+1),series:[
+      {name:'SAC',c:'c1',values:sacRows.map(x=>x[1])},{name:'Price',c:'c2',values:prRows.map(x=>x[1])}]});
+    tbl();
+  }
+  bindSeg($('#im-tsys'),v=>{sys=v;tbl();});
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  $('#im-det').addEventListener('toggle',tbl);
+  calc();
+}
+
+/* ================= porcentagem ================= */
+function buildPct(root){
+  const inl=(id,v)=>`<input class="inl" id="${id}" type="text" inputmode="decimal" value="${v}" autocomplete="off" spellcheck="false">`;
+  const fp=v=>nf(0,4).format(v);
+  const ok=(...a)=>a.every(Number.isFinite);
+  const defs=[
+    {h:'Porcentagem de um valor',s:`Quanto é ${inl('p1a','10')}% de ${inl('p1b','250')}?`,ann:'Resultado',
+     f:()=>{const a=g('p1a'),b=g('p1b');return ok(a,b)?{t:fp(a*b/100)}:null;}},
+    {h:'Que porcentagem um valor representa',s:`${inl('p2a','25')} é quantos % de ${inl('p2b','250')}?`,ann:'Porcentagem',
+     f:()=>{const a=g('p2a'),b=g('p2b');return ok(a,b)&&b!==0?{t:fp(a/b*100)+'%'}:null;}},
+    {h:'Variação entre dois valores',s:`De ${inl('p3a','80')} para ${inl('p3b','100')}.`,ann:'Variação',
+     f:()=>{const a=g('p3a'),b=g('p3b');if(!ok(a,b)||a===0)return null;const d=(b-a)/Math.abs(a)*100;
+       return {t:(d>0?'+':d<0?'−':'')+fp(Math.abs(d))+'%',ann:d>=0?'Aumento':'Redução'};}},
+    {h:'Acréscimo ou desconto',s:`${inl('p4b','250')} com ${inl('p4a','10')}% de <select id="p4s"><option value="+">acréscimo</option><option value="-">desconto</option></select>.`,ann:'Valor final',
+     f:()=>{const b=g('p4b'),a=g('p4a');if(!ok(a,b))return null;const sg=$('#p4s').value==='+'?1:-1,d=b*a/100*sg;
+       return {t:fp(b+d),sub:(d>=0?'+':'−')+fp(Math.abs(d))+' de diferença'};}},
+    {h:'Valor total a partir da parte',s:`${inl('p5a','25')} é ${inl('p5b','10')}% de quanto?`,ann:'Valor total',
+     f:()=>{const a=g('p5a'),b=g('p5b');return ok(a,b)&&b!==0?{t:fp(a*100/b)}:null;}}
+  ];
+  root.innerHTML=defs.map((d,i)=>`<section class="sec${i===0?' first':''}"><h2>${d.h}</h2><div class="sent">${d.s}</div>${lcd('pc'+i,d.ann)}</section>`).join('');
+  function calc(){
+    defs.forEach((d,i)=>{
+      const r=d.f();
+      if(r)setLcd('pc'+i,r.ann||d.ann,r.t,r.sub||'');else setLcd('pc'+i,d.ann,'—','');
+    });
+  }
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  calc();
+}
+
+/* ================= conversor de unidades ================= */
+const lin=(n,f)=>({n:n,to:v=>v*f,from:v=>v/f});
+const UN={
+  'Comprimento':[lin('mm',.001),lin('cm',.01),lin('m',1),lin('km',1000),lin('polegada',.0254),lin('pé',.3048),lin('jarda',.9144),lin('milha',1609.344)],
+  'Massa':[lin('mg',1e-6),lin('g',.001),lin('kg',1),lin('tonelada',1000),lin('onça',.028349523125),lin('libra',.45359237)],
+  'Temperatura':[{n:'°C',to:v=>v,from:v=>v},{n:'°F',to:v=>(v-32)*5/9,from:v=>v*9/5+32},{n:'K',to:v=>v-273.15,from:v=>v+273.15}],
+  'Volume':[lin('mL',.001),lin('L',1),lin('m³',1000),lin('colher de sopa',.015),lin('xícara (240 mL)',.24),lin('galão (EUA)',3.785411784),lin('fl oz (EUA)',.0295735295625)],
+  'Área':[lin('cm²',1e-4),lin('m²',1),lin('km²',1e6),lin('hectare',1e4),lin('pé²',.09290304),lin('acre',4046.8564224),lin('alqueire paulista',24200),lin('alqueire mineiro',48400)],
+  'Velocidade':[lin('m/s',1),lin('km/h',1/3.6),lin('mph',.44704),lin('nó',1852/3600)],
+  'Tempo':[lin('ms',.001),lin('s',1),lin('min',60),lin('h',3600),lin('dia',86400),lin('semana',604800),lin('mês (30 dias)',2592000),lin('ano (365 dias)',31536000)],
+  'Dados':[lin('bit',.125),lin('B',1),lin('KB',1024),lin('MB',1048576),lin('GB',1073741824),lin('TB',1099511627776)]
+};
+const UDEF={'Comprimento':['km','milha'],'Massa':['kg','libra'],'Temperatura':['°C','°F'],'Volume':['L','galão (EUA)'],'Área':['m²','hectare'],'Velocidade':['km/h','mph'],'Tempo':['h','min'],'Dados':['GB','MB']};
+function fs(v){
+  if(!Number.isFinite(v))return '—';
+  if(v===0)return '0';
+  const a=Math.abs(v);
+  if(a>=1e12||a<1e-6)return v.toExponential(4).replace('.',',').replace('e+','e');
+  return v.toLocaleString('pt-BR',{maximumSignificantDigits:8});
+}
+function buildUnits(root){
+  let cat='Comprimento';
+  root.innerHTML=`
+    ${seg('u-cat',Object.keys(UN).map(k=>[k,k]),cat)}
+    <div class="form" style="margin-top:14px">
+      ${fld('u-val','Valor','1',{wide:true})}
+      <div class="swaprow fld wide">
+        ${fldOnly('u-from','De',[],'')}
+        <button type="button" class="k fn swap" id="u-swap" aria-label="Inverter unidades">⇄</button>
+        ${fldOnly('u-to','Para',[],'')}
+      </div>
+    </div>
+    ${lcd('u','Resultado')}
+    <section class="sec"><h2>Em todas as unidades</h2><div id="u-all"></div></section>`;
+  function fill(){
+    const list=UN[cat],d=UDEF[cat];
+    const o=list.map((u,i)=>`<option value="${i}">${esc(u.n)}</option>`).join('');
+    $('#u-from').innerHTML=o;$('#u-to').innerHTML=o;
+    $('#u-from').value=String(list.findIndex(u=>u.n===d[0]));
+    $('#u-to').value=String(list.findIndex(u=>u.n===d[1]));
+  }
+  function calc(){
+    const list=UN[cat],x=g('u-val'),f=list[+$('#u-from').value],t=list[+$('#u-to').value];
+    if(!Number.isFinite(x)||!f||!t){setLcd('u','Resultado','—','');$('#u-all').innerHTML='';return;}
+    const base=f.to(x);
+    setLcd('u','Em '+t.n,fs(t.from(base)),`${fs(x)} ${f.n} equivalem a esse valor.`);
+    $('#u-all').innerHTML=tape(list.map(u=>[esc(u.n),fs(u.from(base))]));
+  }
+  bindSeg($('#u-cat'),v=>{cat=v;fill();calc();});
+  $('#u-swap').addEventListener('click',()=>{const a=$('#u-from').value;$('#u-from').value=$('#u-to').value;$('#u-to').value=a;calc();});
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  fill();calc();
+}
+
+/* ================= datas ================= */
+function buildDates(root){
+  const DAY=864e5;
+  const now=new Date(),tdy=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+  const iso=ms=>new Date(ms).toISOString().slice(0,10);
+  const P=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?Date.UTC(+m[1],+m[2]-1,+m[3]):null;};
+  const long=ms=>new Date(ms).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
+  const short=ms=>new Date(ms).toLocaleDateString('pt-BR',{timeZone:'UTC'});
+  const N0=v=>nf(0,0).format(v);
+  function ymd(a,b){
+    const A=new Date(a),B=new Date(b);
+    let y=B.getUTCFullYear()-A.getUTCFullYear(),m=B.getUTCMonth()-A.getUTCMonth(),d=B.getUTCDate()-A.getUTCDate();
+    if(d<0){m--;d+=new Date(Date.UTC(B.getUTCFullYear(),B.getUTCMonth(),0)).getUTCDate();}
+    if(m<0){y--;m+=12;}
+    return {y,m,d};
+  }
+  function ymdText(o){
+    const p=[];
+    if(o.y)p.push(o.y+(o.y===1?' ano':' anos'));
+    if(o.m)p.push(o.m+(o.m===1?' mês':' meses'));
+    if(o.d||!p.length)p.push(o.d+(o.d===1?' dia':' dias'));
+    return p.join(', ');
+  }
+  function busDays(a,b){
+    const D=Math.round((b-a)/DAY);let c=Math.floor(D/7)*5;const dow=new Date(a).getUTCDay();
+    for(let i=0;i<D%7;i++){const w=(dow+i)%7;if(w!==0&&w!==6)c++;}
+    return c;
+  }
+  function addMonths(ms,n){
+    const d=new Date(ms),y=d.getUTCFullYear(),m=d.getUTCMonth()+n,day=d.getUTCDate();
+    const last=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+    return Date.UTC(y,m,Math.min(day,last));
+  }
+  root.innerHTML=`
+    <section class="sec first"><h2>Diferença entre datas</h2>
+      <div class="form">${fld('d1a','De',iso(tdy),{type:'date'})}${fld('d1b','Até',iso(tdy+30*DAY),{type:'date'})}</div>
+      <div id="d1-tape"></div>
+    </section>
+    <section class="sec"><h2>Somar ou subtrair</h2>
+      <div class="form">
+        ${fld('d2a','Data inicial',iso(tdy),{type:'date',wide:true})}
+        ${fldOnly('d2op','Operação',[['+','Somar'],['-','Subtrair']],'+')}
+        ${fldSel('d2n','Quantidade','90','d2u',[['d','dias'],['w','semanas'],['m','meses'],['y','anos']],'d')}
+      </div>
+      ${lcd('d2','Data resultante')}
+      <div id="d2-tape"></div>
+    </section>
+    <section class="sec"><h2>Idade</h2>
+      <div class="form">${fld('d3a','Data de nascimento','',{type:'date',wide:true})}</div>
+      <div id="d3-tape"></div>
+    </section>`;
+  function calc(){
+    // diferença
+    let a=P($('#d1a').value),b=P($('#d1b').value);
+    if(a==null||b==null){$('#d1-tape').innerHTML='<p class="note">Escolha as duas datas.</p>';}
+    else{
+      const inv=a>b;if(inv){const t=a;a=b;b=t;}
+      const D=Math.round((b-a)/DAY);
+      $('#d1-tape').innerHTML=tape([
+        ['Total de dias',N0(D)],
+        ['Em semanas',`${N0(Math.floor(D/7))} sem e ${D%7} d`],
+        ['Anos, meses e dias',ymdText(ymd(a,b))],
+        ['Dias úteis (seg a sex)',N0(busDays(a,b))],
+        ['Em horas',N0(D*24)]
+      ])+(inv?'<p class="note">As datas estavam invertidas; usamos a ordem cronológica.</p>':'');
+    }
+    // somar/subtrair
+    const s=P($('#d2a').value),n=g('d2n'),u=$('#d2u').value,sg=$('#d2op').value==='+'?1:-1;
+    if(s==null||!Number.isFinite(n)){setLcd('d2','Data resultante','—','Informe a data e a quantidade.');$('#d2-tape').innerHTML='';}
+    else{
+      let r;
+      if(u==='d')r=s+sg*n*DAY;else if(u==='w')r=s+sg*n*7*DAY;else if(u==='m')r=addMonths(s,sg*Math.round(n));else r=addMonths(s,sg*Math.round(n)*12);
+      setLcd('d2','Data resultante',short(r),long(r));
+      const df=Math.round((r-tdy)/DAY);
+      $('#d2-tape').innerHTML=tape([['Em relação a hoje',df===0?'Hoje':df>0?`Daqui a ${N0(df)} ${df===1?'dia':'dias'}`:`Há ${N0(-df)} ${df===-1?'dia':'dias'}`]]);
+    }
+    // idade
+    const bd=P($('#d3a').value);
+    if(bd==null)$('#d3-tape').innerHTML='';
+    else if(bd>tdy)$('#d3-tape').innerHTML='<p class="note">A data de nascimento está no futuro.</p>';
+    else{
+      const by=new Date(bd);
+      let nb=Date.UTC(new Date(tdy).getUTCFullYear(),by.getUTCMonth(),by.getUTCDate());
+      if(nb<tdy)nb=Date.UTC(new Date(tdy).getUTCFullYear()+1,by.getUTCMonth(),by.getUTCDate());
+      const dn=Math.round((nb-tdy)/DAY);
+      $('#d3-tape').innerHTML=tape([
+        ['Idade',ymdText(ymd(bd,tdy))],
+        ['Dias vividos',N0(Math.round((tdy-bd)/DAY))],
+        ['Próximo aniversário',dn===0?'É hoje':`Em ${N0(dn)} ${dn===1?'dia':'dias'}`]
+      ]);
+    }
+  }
+  root.addEventListener('input',calc);root.addEventListener('change',calc);
+  calc();
+}
+
+/* ================= abas ================= */
+const TABS=[
+  {id:'basic',label:'Básica',panel:'calc'},
+  {id:'sci',label:'Científica',panel:'calc'},
+  {id:'juros',label:'Juros',panel:'juros',build:buildJuros},
+  {id:'invest',label:'Investir',panel:'invest',build:buildInvest},
+  {id:'metas',label:'Metas',panel:'metas',build:buildMetas},
+  {id:'imovel',label:'Imóvel',panel:'imovel',build:buildImovel},
+  {id:'pct',label:'Porcentagem',panel:'pct',build:buildPct},
+  {id:'un',label:'Unidades',panel:'un',build:buildUnits},
+  {id:'datas',label:'Datas',panel:'datas',build:buildDates}
+];
+const tabsEl=$('#tabs'),main=$('#main');
+tabsEl.innerHTML=TABS.map(t=>`<button type="button" class="tab" role="tab" data-id="${t.id}">${t.label}</button>`).join('');
+Array.from(new Set(TABS.map(t=>t.panel))).forEach(p=>{
+  const s=document.createElement('section');s.className='panel';s.id='panel-'+p;main.appendChild(s);
+});
+buildCalc($('#panel-calc'));$('#panel-calc').dataset.built='1';
+
+function showTab(id){
+  const t=TABS.find(x=>x.id===id)||TABS[0];
+  $$('.tab',tabsEl).forEach(b=>{const on=b.dataset.id===t.id;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');if(on&&b.scrollIntoView)b.scrollIntoView({inline:'center',block:'nearest'});});
+  $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+t.panel));
+  const panel=$('#panel-'+t.panel);
+  if(t.panel==='calc')panel.classList.toggle('sci',t.id==='sci');
+  if(!panel.dataset.built){panel.dataset.built='1';if(t.build)t.build(panel);}
+  store.set('tab',t.id);
+}
+tabsEl.addEventListener('click',e=>{const b=e.target.closest('.tab');if(b){showTab(b.dataset.id);window.scrollTo({top:0});}});
+const q=new URLSearchParams(location.search).get('tab');showTab(q&&TABS.some(t=>t.id===q)?q:store.get('tab','basic'));
+
+})();
+</script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s);};
+  var btn=$('#install'),tip=$('#ios-tip'),deferred=null;
+  var standalone=function(){return (window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;};
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  function show(){if(!standalone())btn.hidden=false;}
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferred=e;show();});
+  window.addEventListener('appinstalled',function(){deferred=null;btn.hidden=true;tip.hidden=true;});
+  if(ios&&!standalone())show();
+  btn.addEventListener('click',function(){
+    if(deferred){deferred.prompt();deferred.userChoice.then(function(){deferred=null;btn.hidden=true;});}
+    else if(ios){tip.hidden=!tip.hidden;}
+  });
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+  }
+})();
+</script>
+</body>
+</html>

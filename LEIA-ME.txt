@@ -1,0 +1,82 @@
+CALCTUDO - INSTALAÇÃO COMO APLICATIVO
+=====================================
+
+O que é este pacote
+-------------------
+Um aplicativo web instalável (PWA). Depois de publicado em um endereço https,
+ele pode ser instalado no Android, no iPhone/iPad e no Windows. Abre em tela
+cheia, com ícone próprio, e funciona sem internet depois da primeira abertura.
+
+Conteúdo da pasta
+-----------------
+index.html            o aplicativo
+manifest.webmanifest  nome, cores e ícones (é o que permite instalar)
+sw.js                 guarda os arquivos no aparelho (uso offline)
+icons/                ícones para Android, iPhone e Windows
+fonts/                fontes incluídas (não usa nenhum serviço externo)
+
+
+PASSO 1 - Publicar a pasta (só uma vez)
+---------------------------------------
+Os navegadores só oferecem a instalação quando o app está em um endereço
+https. Escolha uma opção gratuita e envie a pasta COMPLETA (index.html,
+manifest.webmanifest, sw.js e as pastas icons e fonts):
+
+- Netlify: acesse app.netlify.com/drop e arraste esta pasta. Você recebe um
+  endereço https na hora. Se pedir, crie uma conta gratuita para manter o
+  site no ar.
+- GitHub Pages: crie um repositório, envie os arquivos e ative em
+  Settings > Pages.
+- Cloudflare Pages ou Vercel: também aceitam o envio da pasta.
+
+Anote o endereço que o serviço criar. É ele que você abre nos aparelhos.
+
+
+PASSO 2 - Instalar em cada aparelho
+-----------------------------------
+Android (Chrome)
+  Abra o endereço. Toque em "Instalar app" no topo do CalcTudo ou no menu
+  (três pontos) > "Instalar app" / "Adicionar à tela inicial".
+
+iPhone e iPad (Safari)
+  Abra o endereço. Toque em Compartilhar (quadrado com seta para cima) >
+  "Adicionar à Tela de Início" > Adicionar.
+
+Windows (Edge ou Chrome)
+  Abra o endereço. Clique no ícone de instalar na barra de endereço ou no
+  botão "Instalar app" do CalcTudo. No Edge, também vale: menu (três
+  pontos) > Aplicativos > "Instalar este site como um aplicativo".
+  O app aparece no menu Iniciar e pode ser fixado na barra de tarefas.
+
+
+Testar no seu computador antes de publicar (opcional)
+-----------------------------------------------------
+Com Python instalado, abra um terminal nesta pasta e execute:
+    python -m http.server 8000
+Depois acesse http://localhost:8000 no Chrome ou no Edge. O endereço
+localhost também aceita instalação.
+
+
+Atualizar o app depois
+----------------------
+Substitua os arquivos no mesmo lugar em que publicou e aumente o número no
+início do sw.js (de calctudo-v1 para calctudo-v2). O app se atualiza
+sozinho na próxima abertura com internet.
+
+
+Lojas de aplicativos (opcional)
+-------------------------------
+Este pacote não é um APK, um IPA nem um instalador .exe. Se quiser publicar
+nas lojas, o site pwabuilder.com empacota o endereço publicado para a
+Microsoft Store e para o Google Play. A App Store da Apple exige um Mac e uma
+conta de desenvolvedor Apple.
+
+
+Observações
+-----------
+- Os cálculos financeiros são simulações educativas. Taxas, impostos e regras
+  mudam; confirme os valores com a instituição financeira antes de decidir.
+- Os dados digitados ficam só no aparelho. O app não envia nada para a
+  internet.
+- Fontes: Bricolage Grotesque e Azeret Mono, licença SIL Open Font License
+  (textos em fonts/LICENSE-*.txt).
