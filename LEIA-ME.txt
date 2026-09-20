@@ -7,7 +7,7 @@ Um aplicativo web instalável (PWA). Depois de publicado em um endereço https,
 ele pode ser instalado no Android, no iPhone/iPad e no Windows. Abre em tela
 cheia, com ícone próprio, e funciona sem internet depois da primeira abertura.
 
-Conteúdo da pasta
+Conteúdo da pasta.
 -----------------
 index.html            o aplicativo
 manifest.webmanifest  nome, cores e ícones (é o que permite instalar)
