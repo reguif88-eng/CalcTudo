@@ -130,7 +130,7 @@ h1{font:700 21px/1 var(--ui);letter-spacing:-.02em;margin:14px 0 10px}
 .tape{margin-top:14px}
 .tape .row{display:flex;align-items:baseline;gap:8px;padding:7px 0;font:500 14px var(--ui);color:var(--ink-2)}
 .tape .dots{flex:1 1 12px;min-width:12px;border-bottom:2px dotted var(--ink-3);opacity:.55;transform:translateY(-3px)}
-.tape b{font:500 14px var(--num);color:var(--ink);text-align:right}
+.tape b{font:500 14px var(--num);color:var(--ink);text-align:right;white-space:nowrap}
 .tape b.pos{color:var(--good)}
 .tape b.neg{color:var(--bad)}
 .tape.sm{margin-top:8px}
@@ -274,14 +274,75 @@ function toast(msg){
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),1500);
 }
 
+
+/* ---------- máscaras de digitação ---------- */
+const groupInt=s=>s.replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+// R$: você digita só números; os dois últimos dígitos viram centavos (10000 → 100,00)
+function maskMoney(raw){
+  const digits=String(raw).replace(/\D/g,'');
+  if(!digits)return '';
+  let d=digits.replace(/^0+/,'').slice(0,14);
+  if(!d)return '0,00';
+  d=d.padStart(3,'0');
+  return groupInt(d.slice(0,-2))+','+d.slice(-2);
+}
+// Percentuais, prazos e quantidades: pontos de milhar automáticos; a vírgula só quando houver decimais
+function maskNum(raw,maxDec){
+  let s=String(raw);
+  const neg=/^\s*[-−]/.test(s);
+  s=s.replace(/\./g,'').replace(/[^\d,]/g,'');
+  const i=s.indexOf(',');
+  let ip=i<0?s:s.slice(0,i);
+  const dp=i<0?'':s.slice(i+1).replace(/,/g,'').slice(0,maxDec);
+  ip=ip.replace(/^0+(?=\d)/,'');
+  if(i>=0&&ip==='')ip='0';
+  return (neg?'-':'')+groupInt(ip)+(i>=0?','+dp:'');
+}
+function applyMask(el){
+  const m=el.dataset.mask;
+  if(m==='money'){
+    const out=maskMoney(el.value);
+    if(out!==el.value)el.value=out;
+    try{el.setSelectionRange(out.length,out.length);}catch(_){}
+  }else if(m==='num'){
+    let raw=el.value;
+    const caret=el.selectionStart==null?raw.length:el.selectionStart;
+    if(raw.endsWith('.')&&!raw.includes(','))raw=raw.slice(0,-1)+',';   // ponto no fim vira vírgula decimal
+    const sig=(raw.slice(0,caret).match(/[\d,]/g)||[]).length;
+    const out=maskNum(raw,+el.dataset.dec||4);
+    if(out!==el.value)el.value=out;
+    let pos=0,seen=0;
+    if(out[0]==='-'&&caret>0)pos=1;   // mantém o cursor depois do sinal de menos
+    while(pos<out.length&&seen<sig){if(/[\d,]/.test(out[pos]))seen++;pos++;}
+    try{el.setSelectionRange(pos,pos);}catch(_){}
+  }
+}
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el&&el.dataset&&el.dataset.mask&&!e.isComposing)applyMask(el);
+},true);
+document.addEventListener('paste',e=>{
+  const el=e.target;
+  if(!(el&&el.dataset&&el.dataset.mask))return;
+  const cd=e.clipboardData||window.clipboardData;
+  const v=parseNum(cd?cd.getData('text'):'');
+  if(!Number.isFinite(v))return;
+  e.preventDefault();
+  el.value=el.dataset.mask==='money'
+    ?maskMoney(String(Math.round(Math.abs(v)*100)))
+    :maskNum(String(+v.toFixed(+el.dataset.dec||4)).replace('.',','),+el.dataset.dec||4);
+  el.dispatchEvent(new Event('input',{bubbles:true}));
+},true);
+
 /* ---------- blocos de HTML ---------- */
 function fld(id,label,value,o={}){
-  const inp=`<input id="${id}" type="${o.type||'text'}"${o.type==='date'?'':' inputmode="decimal"'} value="${esc(value)}" autocomplete="off" spellcheck="false"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`;
+  const mk=o.type==='date'?'':(o.mask||(o.pre==='R$'?'money':'num'));
+  const inp=`<input id="${id}" type="${o.type||'text'}"${o.type==='date'?'':' inputmode="decimal"'}${mk?` data-mask="${mk}"`:''}${o.dec?` data-dec="${o.dec}"`:''} value="${esc(value)}" autocomplete="off" spellcheck="false"${o.ph?` placeholder="${esc(o.ph)}"`:''}>`;
   return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb">${o.pre?`<span class="pre">${o.pre}</span>`:''}${inp}${o.suf?`<span class="suf">${o.suf}</span>`:''}</span>${o.hint!==undefined?`<span class="hint" id="${id}-h">${o.hint}</span>`:''}</label>`;
 }
 function opts(list,sel){return list.map(([v,l])=>`<option value="${esc(v)}"${String(v)===String(sel)?' selected':''}>${l}</option>`).join('');}
 function fldSel(id,label,value,sid,list,sel,o={}){
-  return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb">${o.pre?`<span class="pre">${o.pre}</span>`:''}<input id="${id}" type="text" inputmode="decimal" value="${esc(value)}" autocomplete="off" spellcheck="false"><select id="${sid}">${opts(list,sel)}</select></span>${o.hint!==undefined?`<span class="hint" id="${id}-h">${o.hint}</span>`:''}</label>`;
+  return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb">${o.pre?`<span class="pre">${o.pre}</span>`:''}<input id="${id}" type="text" inputmode="decimal" data-mask="${o.mask||(o.pre==='R$'?'money':'num')}" value="${esc(value)}" autocomplete="off" spellcheck="false"><select id="${sid}">${opts(list,sel)}</select></span>${o.hint!==undefined?`<span class="hint" id="${id}-h">${o.hint}</span>`:''}</label>`;
 }
 function fldOnly(sid,label,list,sel,o={}){
   return `<label class="fld${o.wide?' wide':''}"><span class="fl">${label}</span><span class="fb"><select id="${sid}">${opts(list,sel)}</select></span></label>`;
@@ -768,7 +829,7 @@ function buildInvest(root){
     $('#i-list').innerHTML=`<p class="note" style="margin:0 0 6px">Você investe ${brl0(invested)} em ${dur(n)}.</p>`+order.map((p,idx)=>{
       const wi=Math.min(100,invested/max*100),wg=Math.max(0,p.net-invested)/max*100;
       const rows=[['Rendimento líquido',brl(p.gain),'pos'],[p.taxPaid>0.005?'IR pago':'Imposto',p.taxPaid>0.005?brl(p.taxPaid):'Isento']];
-      if(ipca>0)rows.push(['Em valores de hoje',brl(p.real)]);
+      if(ipca>0)rows.push(['Em valores de hoje (valor presente)',brl(p.real)]);
       return `<div class="prod">
         <div class="ph"><span class="pn"><i class="sw" style="background:var(--${p.c})"></i>${p.name}${idx===0?'<em class="tag">melhor</em>':''}</span><b class="pv">${brl(p.net)}</b></div>
         <div class="bar"><span style="width:${wi.toFixed(1)}%"></span><span class="g" style="width:${wg.toFixed(1)}%;background:var(--${p.c})"></span></div>
@@ -960,7 +1021,7 @@ function buildImovel(root){
 
 /* ================= porcentagem ================= */
 function buildPct(root){
-  const inl=(id,v)=>`<input class="inl" id="${id}" type="text" inputmode="decimal" value="${v}" autocomplete="off" spellcheck="false">`;
+  const inl=(id,v)=>`<input class="inl" id="${id}" type="text" inputmode="decimal" data-mask="num" value="${v}" autocomplete="off" spellcheck="false">`;
   const fp=v=>nf(0,4).format(v);
   const ok=(...a)=>a.every(Number.isFinite);
   const defs=[
@@ -1013,7 +1074,7 @@ function buildUnits(root){
   root.innerHTML=`
     ${seg('u-cat',Object.keys(UN).map(k=>[k,k]),cat)}
     <div class="form" style="margin-top:14px">
-      ${fld('u-val','Valor','1',{wide:true})}
+      ${fld('u-val','Valor','1',{wide:true,dec:8})}
       <div class="swaprow fld wide">
         ${fldOnly('u-from','De',[],'')}
         <button type="button" class="k fn swap" id="u-swap" aria-label="Inverter unidades">⇄</button>
